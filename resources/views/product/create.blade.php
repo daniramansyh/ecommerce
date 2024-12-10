@@ -52,9 +52,11 @@
 
             <div class="mb-6">
                 <label for="image" class="block text-sm font-medium text-gray-700 mb-2">Gambar Produk:</label>
-                <div class="relative">
-                    <input type="file" name="image" id="image" accept="image/*" required
-                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border file:border-gray-300 file:text-sm file:font-medium file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500">
+                <div id="drop-area"
+                    class="relative border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 hover:bg-gray-100 cursor-pointer">
+                    <p class="text-center text-sm text-gray-500" id="drop-text">Drag & Drop gambar di sini, atau klik
+                        untuk memilih file</p>
+                    <input type="file" name="image" id="image" accept="image/*" class="hidden">
                 </div>
             </div>
 
@@ -68,3 +70,56 @@
 </div>
 
 @endsection
+
+@push('script')
+<script>
+    const dropArea = document.getElementById('drop-area');
+    const fileInput = document.getElementById('image');
+    const dropText = document.getElementById('drop-text');
+
+    dropArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropArea.classList.add('border-blue-500', 'bg-blue-50');
+        dropText.textContent = 'Lepaskan file untuk mengunggah';
+    });
+
+    dropArea.addEventListener('dragleave', () => {
+        dropArea.classList.remove('border-blue-500', 'bg-blue-50');
+        dropText.textContent = 'Drag & Drop gambar di sini, atau klik untuk memilih file';
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropArea.classList.remove('border-blue-500', 'bg-blue-50');
+        dropText.textContent = 'Drag & Drop gambar di sini, atau klik untuk memilih file';
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            handleFile(files[0]);
+        }
+    });
+
+    dropArea.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', (e) => {
+        const files = e.target.files;
+        if (files.length > 0) {
+            handleFile(files[0]);
+        }
+    });
+
+    function handleFile(file) {
+        console.log('File dipilih:', file);
+        // Optional: menampilkan preview gambar
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.classList.add('w-full', 'mt-2');
+            dropArea.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+    }
+</script>
+@endpush
